@@ -1,0 +1,56 @@
+----------------------------------------------------------
+IFF-7-2_Kristinaitis_Giedrius_L1_dat_1.json Results
+----------------------------------------------------------
+                    Title|     Price|  Quantity|    Result
+----------------------------------------------------------
+  3/2 bbbbbbbbbbbbbbbbbbb|420.690002|       100|         b
+  2/1 bbbbbbbbbbbbbbbbbbb|420.690002|       100|         b
+  4/3 bbbbbbbbbbbbbbbbbbb|420.690002|       100|         b
+ 50/2 bbbbbbbbbbbbbbbbbbb|420.690002|       100|         b
+ 51/3 bbbbbbbbbbbbbbbbbbb|420.690002|       100|         b
+                dbgbhdfgb|420.690002|       100|         b
+                 sdcwdccf|420.690002|       100|         d
+                   dfdfdf|420.690002|       100|         d
+                   ghghgh|420.690002|       100|         g
+                sdfgbdfbh|420.690002|       100|         g
+                 vtbjgjnn|420.690002|       100|         g
+                 hjhjhjhj|420.690002|       100|         h
+                   gmkhjm|420.690002|       100|         j
+                  plplplp|420.690002|       100|         l
+                     ghmg|420.690002|       100|         m
+                 dfghnfhn|420.690002|       100|         n
+                 rtrtrtrt|420.690002|       100|         r
+                       ss|420.690002|       100|         s
+                 sdfvsdfv|420.690002|       100|         s
+                   Frfgst|420.690002|       100|         s
+                   sdsdsd|420.690002|       100|         s
+                    Svnth|420.690002|       100|         t
+                     Sxth|420.690002|       100|         t
+                 vcvcvccv|420.690002|       100|         v
+                sdfvsdfgb|420.690002|       100|         v
+----------------------------------------------------------
+----------------------------------------------------------
+IFF-7-2_Kristinaitis_Giedrius_L1_dat_2.json Results
+----------------------------------------------------------
+                    Title|     Price|  Quantity|    Result
+----------------------------------------------------------
+  2/1 bbbbbbbbbbbbbbbbbbb|420.690002|       100|         b
+ 51/3 bbbbbbbbbbbbbbbbbbb|420.690002|       100|         b
+  3/2 bbbbbbbbbbbbbbbbbbb|420.690002|       100|         b
+  4/3 bbbbbbbbbbbbbbbbbbb|420.690002|       100|         b
+ 50/2 bbbbbbbbbbbbbbbbbbb|420.690002|       100|         b
+              ccccccccccc|420.690002|       100|         c
+                 sdcwdccf|420.690002|       100|         d
+                   dfdfdf|420.690002|       100|         d
+                   ghghgh|420.690002|       100|         g
+                 dfghnfhn|420.690002|       100|         n
+                   sdsdsd|420.690002|       100|         s
+                       ss|420.690002|       100|         s
+----------------------------------------------------------
+----------------------------------------------------------
+IFF-7-2_Kristinaitis_Giedrius_L1_dat_3.json Results
+----------------------------------------------------------
+                    Title|     Price|  Quantity|    Result
+----------------------------------------------------------
+No results - no elements match the filter
+----------------------------------------------------------
