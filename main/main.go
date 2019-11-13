@@ -53,16 +53,18 @@ func mainThreadAction(filename string) {
 	mainToDataChannel := make(chan Product)
 	resultToMainChannel := make(chan Product)
 	resultToMainElementCountChannel := make(chan int)
-	dataToWorkerChannel := make(chan Product)
+	dataToWorkerChannel := make(chan Product, DATA_ELEMENT_COUNT)
 	dataToResultChannel := make(chan bool)
 	workerToResultChannel := make(chan Product, DATA_ELEMENT_COUNT)
+	addRequestChannel := make(chan string)
+	removeRequestChannel := make(chan string)
 
 	// spawn threads
 	for i := 0; i < WORKER_THREAD_COUNT; i++ {
-		go workerThreadAction(dataToWorkerChannel, workerToResultChannel)
+		go workerThreadAction(dataToWorkerChannel, workerToResultChannel, removeRequestChannel)
 	}
 
-	go dataThreadAction(dataToWorkerChannel, mainToDataChannel, dataToResultChannel)
+	go dataThreadAction(dataToWorkerChannel, mainToDataChannel, dataToResultChannel, addRequestChannel, removeRequestChannel)
 	go resultThreadAction(workerToResultChannel, resultToMainChannel, dataToResultChannel, resultToMainElementCountChannel)
 
 	// read data
@@ -70,6 +72,17 @@ func mainThreadAction(filename string) {
 
 	// send data to data thread
 	for i := 0; i < len(data); i++ {
+		addRequestChannel <- "add"
+		response := <-addRequestChannel
+
+		if response != "ok" {
+			if i >= 1 {
+				i--
+			}
+
+			continue;
+		}
+
 		mainToDataChannel <- data[i]
 	}
 
@@ -86,27 +99,69 @@ func mainThreadAction(filename string) {
 }
 
 // reads data from a file and passes it to worker threads
-func dataThreadAction(dataToWorkerChannel chan Product, mainToDataChannel chan Product, dataToResultChannel chan bool) {
+func dataThreadAction(dataToWorkerChannel chan Product, mainToDataChannel chan Product, dataToResultChannel chan bool, addRequestChannel chan string, removeRequestChannel chan string) {
 	var data = make([]Product, DATA_ARRAY_SIZE)
 	totalElementsReceived := 0
 	totalElementsSent := 0
 	index := -1
 
 	for {
-		// send a product to a worker thread
-		if index > -1 {
-			product := data[index]
-			dataToWorkerChannel <- product
-			index--
-			totalElementsSent++
-		}
-
-		// receive a product from the main thread
-		if index < DATA_ARRAY_SIZE && totalElementsReceived < DATA_ELEMENT_COUNT {
-			product := <-mainToDataChannel
-			index++
-			totalElementsReceived++
-			data[index] = product
+		if index > -1 && index < DATA_ARRAY_SIZE - 1 && totalElementsReceived < DATA_ELEMENT_COUNT {
+			select {
+				case addRequest := <-addRequestChannel:
+					// receive a product from the main thread
+					if addRequest == "add" {
+						addRequestChannel <- "ok"
+						product := <-mainToDataChannel
+						index++
+						totalElementsReceived++
+						data[index] = product
+					} else {
+						addRequestChannel <- "not ok"
+					}
+				default:
+					select {
+						case removeRequest := <-removeRequestChannel:
+							// send a product to a worker thread
+							if removeRequest == "remove" {
+								product := data[index]
+								dataToWorkerChannel <- product
+								index--
+								totalElementsSent++
+							}
+						default:
+							continue
+					}
+			}
+		} else if index < DATA_ARRAY_SIZE - 1 && totalElementsReceived < DATA_ELEMENT_COUNT {
+			select {
+				case addRequest := <-addRequestChannel:
+					// receive a product from the main thread
+					if addRequest == "add" {
+						addRequestChannel <- "ok"
+						product := <-mainToDataChannel
+						index++
+						totalElementsReceived++
+						data[index] = product
+					} else {
+						addRequestChannel <- "not ok"
+					}
+				default:
+					continue
+			}
+		} else if index > -1 {
+			select {
+				case removeRequest := <-removeRequestChannel:
+					// send a product to a worker thread
+					if removeRequest == "remove" {
+						product := data[index]
+						dataToWorkerChannel <- product
+						index--
+						totalElementsSent++
+					}
+				default:
+					continue
+			}
 		}
 
 		if totalElementsSent == DATA_ELEMENT_COUNT {
@@ -125,34 +180,39 @@ func dataThreadAction(dataToWorkerChannel chan Product, mainToDataChannel chan P
 }
 
 // processes data received from data thread and sends it to result thread
-func workerThreadAction(dataToWorkerChannel chan Product, workerToResultChannel chan Product) {
+func workerThreadAction(dataToWorkerChannel chan Product, workerToResultChannel chan Product, removeRequestChannel chan string) {
 	for {
-		product := <-dataToWorkerChannel
+		removeRequestChannel <- "remove"
 
-		if product.Invalid {
-			break
-		}
+		select {
+			case product := <-dataToWorkerChannel:
+				if product.Invalid {
+					break
+				}
 
-		// process product
-		result := ""
+				// process product
+				result := ""
 
-		for i := 0; i < int(product.Price*float32(product.Quantity)*float32(product.Quantity)); i++ {
-			result = string(product.Title[i%(len(product.Title)-1)])
-		}
+				for i := 0; i < int(product.Price*float32(product.Quantity)*float32(product.Quantity)); i++ {
+					result = string(product.Title[i%(len(product.Title)-1)])
+				}
 
-		product.Result = result
+				product.Result = result
 
-		// filter result and write to result channel
-		resultValid := false
+				// filter result and write to result channel
+				resultValid := false
 
-		for _, letter := range LETTERS {
-			if letter == result {
-				resultValid = true
-			}
-		}
+				for _, letter := range LETTERS {
+					if letter == result {
+						resultValid = true
+					}
+				}
 
-		if resultValid {
-			workerToResultChannel <- product
+				if resultValid {
+					workerToResultChannel <- product
+				}
+			default:
+				continue
 		}
 	}
 }
