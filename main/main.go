@@ -133,34 +133,28 @@ func dataThreadAction(dataToWorkerChannel chan Product, mainToDataChannel chan P
 							continue
 					}
 			}
-		} else if index < DATA_ARRAY_SIZE - 1 && totalElementsReceived < DATA_ELEMENT_COUNT {
-			select {
-				case addRequest := <-addRequestChannel:
-					// receive a product from the main thread
-					if addRequest == "add" {
-						addRequestChannel <- "ok"
-						product := <-mainToDataChannel
-						index++
-						totalElementsReceived++
-						data[index] = product
-					} else {
-						addRequestChannel <- "not ok"
-					}
-				default:
-					continue
+		} else if index == -1 {
+			addRequest := <-addRequestChannel
+
+			// receive a product from the main thread
+			if addRequest == "add" {
+				addRequestChannel <- "ok"
+				product := <-mainToDataChannel
+				index++
+				totalElementsReceived++
+				data[index] = product
+			} else {
+				addRequestChannel <- "not ok"
 			}
 		} else if index > -1 {
-			select {
-				case removeRequest := <-removeRequestChannel:
-					// send a product to a worker thread
-					if removeRequest == "remove" {
-						product := data[index]
-						dataToWorkerChannel <- product
-						index--
-						totalElementsSent++
-					}
-				default:
-					continue
+			removeRequest := <-removeRequestChannel
+
+			// send a product to a worker thread
+			if removeRequest == "remove" {
+				product := data[index]
+				dataToWorkerChannel <- product
+				index--
+				totalElementsSent++
 			}
 		}
 
